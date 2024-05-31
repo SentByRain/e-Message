@@ -279,9 +279,9 @@ const chatList = [
 
 const profile =  {
   name: 'Tina',
-    id: 20,
-    status: 'In job search',
-    avatar: 'https://pikuco.ru/upload/test_stable/522/52297aef53d78bf473ab13748b3fe293.webp'
+  id: 20,
+  status: 'In job search',
+  avatar: 'https://pikuco.ru/upload/test_stable/522/52297aef53d78bf473ab13748b3fe293.webp'
 };
 const getProfile = () => {
   return profile;
