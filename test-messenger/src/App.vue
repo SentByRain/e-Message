@@ -2,7 +2,12 @@
 
 import Contact from './components/Contacts.vue'
 import Message from './components/Message.vue'
-import {DateTime, Duration, Info, Interval, Settings} from 'luxon';
+import {DateTime} from 'luxon';
+
+
+import { useProfileStore } from './stores/ProfileStore';
+import { useContactStore } from './stores/ContactStore';
+import { useMessagesStore } from './stores/MessagesStore';
 
   export default
   {
@@ -12,120 +17,55 @@ import {DateTime, Duration, Info, Interval, Settings} from 'luxon';
     data()
     {
       return{
-        messages: [],
+        isContactChosen: false,
         text: '',
-        time:'',
-        
-        user: 
-        {
-            //id: 991024124,
-            name:'User Chel',
-            source:'./icons/user.jpg'
-        },
+        profileId:'',
+        activeContactId:'',
+    
 
-        usersContacts:
-        [
-          {
-            id: 991024124,
-            name:'Druk Chela',
-            source:'./icons/another guy.jpg'
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-          {
-            id: 12312373,
-            name:'John Chel',
-            source: './icons/cool guy.jpg',
-          },
-        ]
+        profileStore:useProfileStore(),
+        contactStore:useContactStore(),
+        messagesStore:useMessagesStore(),
+
+        //find active contact image and name
+        activeContactPicture: document.querySelector('div#chat-header img.contact-picture'),
+        activeContactName: document.querySelector('div#chat-header span.users-nickname')
       }
     },
+
+    async created() 
+    {
+
+      let profileFromServer = await this.$requestAPI.request.getProfile();
+      this.profileStore.addProfile(profileFromServer);
+      this.profileId = this.profileStore.profile[0].id;
+
+
+      let chatsFromServer = await this.$requestAPI.request.getChats();
+      this.contactStore.addChats(chatsFromServer);
+
+    },
+
     methods:
     {
-      sendMessage()
+      async sendMessage()
       {
-        // const messageDate = DateTime.local().toLocaleString();
-        // console.log(messageDate);
-
-        // this.$nextTick(() =>{messageTime = DateTime.local().toLocaleString(DateTime.TIME_24_SIMPLE)});
-        // console.log(messageTime);
-
-          if(this.text !== '\n')
+         if(this.text !== '\n')
         {
-          const messageTime = DateTime.local().toLocaleString(DateTime.TIME_24_SIMPLE);
+          const messageDate = DateTime.local().toISO();
 
-          this.messages.push({
-            text: this.text,
-            time: messageTime
-          });
+          const newMessage = 
+          {
+            id: Number(this.activeContactId),
+            message: this.text,
+            data: messageDate
+          }
+          
+          const updatedMessages = await this.$requestAPI.request.sendMessage(newMessage);
+
+          this.messagesStore.addNewMessage(updatedMessages);
+          this.scrollToNewMessage();
+   
         }
       },
 
@@ -141,30 +81,37 @@ import {DateTime, Duration, Info, Interval, Settings} from 'luxon';
         textArea.value = '';
       },
 
-      changeContact(event)
+      async changeContact(event)
       {
-        let buttonClikedName;
+        this.isContactChosen = true;
+
+
         
-        if(typeof(event.target.name) !== 'undefined') //this true for img tag
+        if(typeof(event.target.name) !== 'undefined') //this' true for img tag
         {
-          buttonClikedName = event.target.name;
+          this.activeContactId = event.target.name;
         }
         else
         {
-          buttonClikedName = event.target.attributes[0].value; 
+          this.activeContactId = event.target.attributes[0].value; //this' true for div and span
         }
-
+        
         //find image path and name of chosen button
-        const chosenContactPicturePath = document.querySelector('img[name = "' + buttonClikedName +'"]').src;
-        const chosenContactName = document.querySelector('span[name = "' + buttonClikedName +'"]').innerHTML;
+        const chosenContactPicturePath = document.querySelector('img[name = "' + this.activeContactId +'"]').src;
+        const chosenContactName = document.querySelector('span[name = "' + this.activeContactId +'"]').innerHTML;
+        //set path and name in chat-header
+        this.activeContactName = chosenContactName;
+        this.activeContactPicture = chosenContactPicturePath;
 
-        //find active contact image and name
-        const activeContactPicture = document.querySelector('div#chat-header img.contact-picture');
-        const activeContactName = document.querySelector('div#chat-header span.users-nickname');
+        //clear chat-container
+        let oldMessages = document.querySelectorAll("div.message-container");
+        oldMessages.forEach((element) => {element.remove()});
 
-        activeContactName.innerHTML = chosenContactName;
-        activeContactPicture.src = chosenContactPicturePath;
 
+        //request chat messsages
+        let messagesFromServer = await this.$requestAPI.request.getChatData(this.activeContactId);
+        this.messagesStore.addMessages(messagesFromServer, this.activeContactId);
+        this.scrollToNewMessage();
       },
     }
   }
@@ -172,27 +119,25 @@ import {DateTime, Duration, Info, Interval, Settings} from 'luxon';
 
 <template>
   <div id = 'chat-bar'>
-    <div id = 'user-profile'>
-      <Contact :user="user"/>
+    <!-- v-if is used to ignore Contact call untill the profile store gets data  -->
+    <div v-if='profileStore.profile[0] !== undefined' id = 'user-profile'>
+      <Contact :user="profileStore.profile[0]"/> 
     </div> 
     <div id = 'contact-list'>
-      <Contact v-for="(el,index) in usersContacts" :key="index" :user="el" @click = 'changeContact($event)'/>
+      <Contact v-for="(el,index) in contactStore.contacts" :key="index" :user="el" @click = 'changeContact($event)'/>
     </div>
   </div>
   
   <div id = 'messenger-region'> 
     <div id = 'chat-header'>
-      <!-- think what there should be in the beginning -->
-      <div class = 'profile-card'>
-        <img class = 'contact-picture' src="C:\test_task\test-messenger\icons\cool guy.jpg" alt="user"/> 
-        <span class = 'users-nickname'> John Chel</span> 
+      <div v-if='isContactChosen === true'  class = 'profile-card disabled'>
+        <img class = 'contact-picture' :src="activeContactPicture" alt="Active contact"/> 
+        <span class = 'users-nickname'>{{ activeContactName }}</span> 
       </div>
     </div>
     <div id = 'chat-container'>
-      <div class = 'message-container'><div class = 'message-figure user-design'><p class = 'user-text'> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque perferendis dolorem, ex voluptate odio sed delectus iusto possimus, soluta porro, beatae nihil aperiam aut officia veniam assumenda optio quidem quo!</p></div></div>
-      <div class = 'message-container'><div class = 'message-figure contact-design'><p class = 'contact-text'> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque perferendis dolorem, ex voluptate odio sed delectus iusto possimus, soluta porro, beatae nihil aperiam aut officia veniam assumenda optio quidem quo!</p></div></div>
-      <div class = 'message-container' v-for="(el,index) in messages" :key="index">
-        <Message :message = "el" ref="message" />
+      <div class = 'message-container' v-for="(el,index) in messagesStore.messages" :key="index" >
+        <Message :message = "el" :id="profileId"/> 
       </div> 
     </div>
     <div id = 'send-box'>
@@ -257,6 +202,11 @@ body
   cursor:pointer;
 }
 
+
+.disabled {
+  pointer-events: none;
+}
+
 .contact-picture
 {
   object-fit: cover;
@@ -315,7 +265,7 @@ body
   float: left;
 }
 /* I don't know why, but p has margin */
-p.user-text
+p.user-text, p.contact-text
 {
   margin:5px 0;
   
@@ -329,16 +279,13 @@ p.user-text
   word-wrap: break-word;
 
 }
-/* #text
-{
-  overflow-wrap:normal;
-}  */
 
 .contact-text
 {
   color: white;
   text-align: left;
   font-size: small;
+  word-wrap: break-word;
 }
 
 

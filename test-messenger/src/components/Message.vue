@@ -1,7 +1,10 @@
 <template>
-    <div class = 'message-figure user-design'>
-        <p class = 'user-text'>{{ message.text }} <div class = 'message-time user-text'> {{ message.time }}</div></p>
-    </div> 
+    <div v-if="message.from == id" class = 'message-figure user-design'>
+        <p class = 'user-text'>{{ message.message }} <div class = 'message-time user-text'> {{ message.time }}</div></p>
+    </div>
+    <div v-else class = 'message-figure contact-design'>
+        <p class = 'contact-text'>{{ message.message }} <div class = 'message-time contact-text'> {{ message.time }}</div></p>
+    </div>
 </template>
 
 <script>
@@ -13,6 +16,11 @@ export default
         {
             type: Object,
             required: true
+        },
+        id:
+        {
+          type: Number,
+          required:true
         }
     }
 }
