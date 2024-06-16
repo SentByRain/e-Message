@@ -182,7 +182,7 @@ body {
   background: #271c46;
   color: white;
   float: left;
-  min-width: 15%;
+  min-width: 120px;
   height: 100vh;
 }
 
