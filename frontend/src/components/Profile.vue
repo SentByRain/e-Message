@@ -1,8 +1,16 @@
 <script>
 import "/src/assets/users.css";
 
+import { useProfileStore } from "../stores/ProfileStore";
+
 export default {
-  inject: ["profileStore"],
+  data() {
+    return {
+      profileStore: useProfileStore(),
+      contactQuery: "",
+      searcboxActive: false,
+    };
+  },
 
   async beforeCreate() {
     let profileFromServer = await this.$requestAPI.request.getProfile();

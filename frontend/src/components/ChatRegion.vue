@@ -1,9 +1,17 @@
 <script>
 import Message from "./Message.vue";
 
+import { useProfileStore } from "../stores/ProfileStore";
+import { useMessagesStore } from "../stores/MessagesStore";
+
 export default {
+  data() {
+    return {
+      profileStore: useProfileStore(),
+      messagesStore: useMessagesStore(),
+    };
+  },
   components: { Message },
-  inject: ["messagesStore", "profileStore"],
 };
 </script>
 

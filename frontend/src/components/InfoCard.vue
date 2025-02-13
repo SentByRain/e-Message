@@ -1,8 +1,10 @@
 <script>
+import { useContactStore } from "../stores/ContactStore";
 export default {
   data() {
     return {
       notificationOn: false,
+      contactStore: useContactStore(),
     };
   },
   props: {
@@ -21,9 +23,9 @@ export default {
       const slider = document.querySelector(".p-inputswitch-input");
       slider.ariaChecked = this.notificationOn;
     },
-    closeCard() {
-      this.$emit("closeCard");
-    },
+    // closeCard() {
+    //   this.$emit("closeCard");
+    // },
     activateMessageArea() {
       document.getElementById("messageBox").focus();
     },
@@ -32,7 +34,13 @@ export default {
 </script>
 
 <template>
-  <Dialog name="info-card" modal header="Information" class="card-background">
+  <Dialog
+    name="info-card"
+    modal
+    header="Information"
+    class="card-background"
+    v-model:visible="this.contactStore.showInfoCard"
+  >
     <div class="card-line-contact">
       <img class="line-contact-icon" :src="imageScr" alt="contact" />
       <span class="line-content line-content-contact">{{ contactName }}</span>
@@ -59,7 +67,7 @@ export default {
       label="Write a message"
       text
       class="card-button"
-      @click="closeCard(), activateMessageArea()"
+      @click="(this.contactStore.showInfoCard = false), activateMessageArea()"
     ></Button>
   </Dialog>
 </template>

@@ -1,13 +1,18 @@
 <script>
 import { DateTime } from "luxon";
 
+import { useContactStore } from "../stores/ContactStore";
+import { useMessagesStore } from "../stores/MessagesStore";
+
 export default {
   data() {
     return {
+      messagesStore: useMessagesStore(),
+      contactStore: useContactStore(),
       text: "",
     };
   },
-  inject: ["contactStore", "messagesStore", "scrollToNewMessage"],
+  inject: ["scrollToNewMessage"],
   methods: {
     async sendMessage() {
       if (this.text !== "\n" && this.text !== "") {

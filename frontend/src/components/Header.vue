@@ -1,12 +1,18 @@
 <script>
 import "/src/assets/users.css";
+import { useContactStore } from "../stores/ContactStore";
 
 export default {
-  inject: ["contactStore", "isEmpty"],
+  data() {
+    return {
+      contactStore: useContactStore(),
+    };
+  },
+  inject: ["isEmpty"],
 };
 </script>
 <template>
-  <div id="chat-header" @click="this.contactStore.showContactCard = true">
+  <div id="chat-header" @click="this.contactStore.showInfoCard = true">
     <div v-if="!isEmpty(this.contactStore.activeContact)" class="user-card">
       <img
         class="user-picture"

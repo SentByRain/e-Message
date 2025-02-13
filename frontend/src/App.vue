@@ -15,7 +15,7 @@ export default {
 
   data() {
     return {
-      openInfoCard: "false",
+      infoCardOpened: false,
       profileStore: useProfileStore(),
       contactStore: useContactStore(),
       messagesStore: useMessagesStore(),
@@ -46,10 +46,6 @@ export default {
   },
   provide() {
     return {
-      //stores
-      profileStore: this.profileStore,
-      contactStore: this.contactStore,
-      messagesStore: this.messagesStore,
       //functions
       scrollToNewMessage: this.scrollToNewMessage,
       isEmpty: this.isEmpty,
@@ -65,9 +61,9 @@ export default {
   ></Inscription>
   <MessengerRegion v-else class="appearance-animation"> </MessengerRegion>
 
+  <!-- v-if is used to prevent the component from rendering before the contact isn't chosen -->
   <InfoCard
-    @close-card="contactStore.showContactCard = false"
-    v-model:visible="contactStore.showContactCard"
+    v-if="!this.isEmpty(this.contactStore.activeContact)"
     :imageScr="contactStore.activeContact.avatar"
     :contactName="contactStore.activeContact.name"
   />

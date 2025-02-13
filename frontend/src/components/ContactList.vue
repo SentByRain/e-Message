@@ -1,35 +1,26 @@
 <script>
 import Contact from "./Contacts.vue";
 
+import { useContactStore } from "../stores/ContactStore";
+import { useMessagesStore } from "../stores/MessagesStore";
+
 export default {
   components: { Contact },
   data() {
     return {
+      contactStore: useContactStore(),
+      messagesStore: useMessagesStore(),
       activeContactId: null,
     };
   },
-  inject: ["contactStore", "messagesStore", "scrollToNewMessage"],
+  inject: ["scrollToNewMessage"],
   methods: {
-    deactivateContact() {
-      if (this.activeContactId !== null) {
-        document.querySelector(
-          'div[name = "' + this.activeContactId + '"]'
-        ).style.backgroundColor = "";
-      }
-    },
-    activateContact() {
-      document.querySelector(
-        'div[name = "' + this.activeContactId + '"]'
-      ).style.backgroundColor = "#745db3";
-    },
-
     async changeContact(event) {
-      if (typeof event.target.name !== "undefined") {
-        //this' true for img tag
-        this.activeContactId = event.target.name;
-      } else {
-        this.activeContactId = event.target.attributes[0].value; //this' true for div and span
+      //prevent rerender
+      if (this.activeContactId === event.currentTarget.attributes[0].value) {
+        return;
       }
+      this.activeContactId = event.currentTarget.attributes[0].value;
       this.contactStore.updateActiveContact(this.activeContactId);
 
       //clear chat-container
@@ -53,10 +44,11 @@ export default {
 <template>
   <ScrollPanel class="contact-scrollbar">
     <Contact
-      v-for="(el, index) in contactStore.contacts"
-      :key="index"
+      v-for="el in contactStore.contacts"
+      :key="el.id"
       :contact="el"
-      @click="deactivateContact(), changeContact($event), activateContact()"
+      :activeId="Number(this.activeContactId)"
+      @click="changeContact($event)"
     />
   </ScrollPanel>
 </template>

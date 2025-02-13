@@ -1,12 +1,14 @@
 <script>
+import { useContactStore } from "../stores/ContactStore";
+
 export default {
   data() {
     return {
+      contactStore: useContactStore(),
       contactQuery: "",
       searcboxActive: false,
     };
   },
-  inject: ["contactStore"],
   methods: {
     searchSimilarContacts() {
       const lettersInQuery = this.contactQuery.length;

@@ -5,7 +5,7 @@ export const useContactStore = defineStore("ContactStore", {
   state: () => ({
     contacts: [],
     activeContact: {},
-    showContactCard: false,
+    showInfoCard: false,
   }),
   actions: {
     addChats(chatsFromServer) {
@@ -47,11 +47,9 @@ export const useContactStore = defineStore("ContactStore", {
     },
 
     updateActiveContact(activeContactId) {
-      for (let contact of this.contacts) {
-        if (contact.id == activeContactId) {
-          this.activeContact = contact;
-        }
-      }
+      this.activeContact = this.contacts.find(
+        (contact) => contact.id === Number(activeContactId)
+      );
     },
   },
 });
